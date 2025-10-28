@@ -34,11 +34,11 @@ public class Epd028Processor implements TirMessageProcessor {
                 .build());
 
         return """
-                <EPD029>
+                <EPD028>
                     <GuaranteeNumber>%s</GuaranteeNumber>
                     <CustomsIndex>%s</CustomsIndex>
                     <Status>ASSIGNED</Status>
-                </EPD029>"""
+                </EPD028>"""
                 .formatted(guarantee, customsIndex);
     }
 }

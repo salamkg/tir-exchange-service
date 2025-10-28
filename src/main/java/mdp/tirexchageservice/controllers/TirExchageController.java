@@ -25,8 +25,9 @@ public class TirExchageController {
     }
 
     @GetMapping("/messages")
-    public List<TirMessage> getMessages() {
-        return repository.findAll();
+    public List<TirMessage> getMessages(@RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size) {
+        return service.getMessages(page, size);
     }
 
 }

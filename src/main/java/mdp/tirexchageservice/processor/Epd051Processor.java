@@ -27,10 +27,10 @@ public class Epd051Processor implements TirMessageProcessor {
                 .build());
 
         return """
-                <EPD016>
+                <EPD051>
                     <GuaranteeNumber>%s</GuaranteeNumber>
                     <Status>REJECTED</Status>
-                </EPD016>"""
+                </EPD051>"""
                 .formatted(guarantee);
     }
 }
