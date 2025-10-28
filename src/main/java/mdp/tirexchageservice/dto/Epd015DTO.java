@@ -1,4 +1,4 @@
-package mdp.tirexchageservice.models.dto;
+package mdp.tirexchageservice.dto;
 
 import jakarta.xml.bind.annotation.*;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 @XmlRootElement(name = "EPD015")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Epd015 {
+public class Epd015DTO {
 
     @XmlElement(name = "GuaranteeNumber", required = true)
     private String guaranteeNumber;

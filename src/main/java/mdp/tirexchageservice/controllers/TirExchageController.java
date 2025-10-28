@@ -1,9 +1,9 @@
 package mdp.tirexchageservice.controllers;
 
-import lombok.AllArgsConstructor;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
-import mdp.tirexchageservice.models.TirMessage;
-import mdp.tirexchageservice.processor.Epd015Processor;
+import mdp.tirexchageservice.exceptions.SoapFaultException;
+import mdp.tirexchageservice.entities.TirMessage;
 import mdp.tirexchageservice.respositories.TirMessageRepository;
 import mdp.tirexchageservice.services.TirExchangeService;
 import org.springframework.http.MediaType;
@@ -20,7 +20,7 @@ public class TirExchageController {
     private final TirExchangeService service;
 
     @PostMapping(value = "/exchange", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public String receiveExchange(@RequestBody String xml) {
+    public String receiveExchange(@RequestBody String xml) throws SoapFaultException, JAXBException {
         return service.handleMessage(xml);
     }
 

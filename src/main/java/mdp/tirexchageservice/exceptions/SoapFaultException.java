@@ -1,15 +1,25 @@
 package mdp.tirexchageservice.exceptions;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 
 @Getter
-public class SoapFaultException extends RuntimeException {
-    private final String faultCode;
-    private final String faultString;
+@XmlRootElement(name = "soap:Fault")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class SoapFaultException extends Exception {
+    @XmlElement
+    private String faultCode;
+    @XmlElement
+    private String faultString;
 
-    public SoapFaultException(String code, String message) {
-        super(message);
-        this.faultCode = code;
-        this.faultString = message;
+    public SoapFaultException() {} // JAXB
+
+    public SoapFaultException(String faultCode, String faultString) {
+        super(faultString);
+        this.faultCode = faultCode;
+        this.faultString = faultString;
     }
 }

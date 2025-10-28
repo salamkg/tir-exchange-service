@@ -1,4 +1,4 @@
-package mdp.tirexchageservice.models;
+package mdp.tirexchageservice.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,9 +1,11 @@
 package mdp.tirexchageservice.processor;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
+import mdp.tirexchageservice.dto.Epd015DTO;
 import mdp.tirexchageservice.exceptions.SoapFaultException;
-import mdp.tirexchageservice.models.TirMessage;
+import mdp.tirexchageservice.entities.TirMessage;
+import mdp.tirexchageservice.mappers.TirMessageMapper;
 import mdp.tirexchageservice.respositories.TirMessageRepository;
 import mdp.tirexchageservice.util.XmlUtils;
 import org.springframework.stereotype.Service;
@@ -14,25 +16,24 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class Epd015Processor implements TirMessageProcessor {
     private final TirMessageRepository repository;
+    private final TirMessageMapper tirMessageMapper;
 
     @Override
-    public String process(String xmlPayload) {
-        String guarantee = XmlUtils.extract(xmlPayload, "GuaranteeNumber");
+    public String process(String xmlPayload) throws SoapFaultException, JAXBException {
+        //From XML to DTO
+        Epd015DTO dto = XmlUtils.fromXml(xmlPayload, Epd015DTO.class);
         String iru = XmlUtils.extract(xmlPayload, "IruReference");
-        String holder = XmlUtils.extract(xmlPayload, "HolderNumber");
 
-        if (guarantee == null)
+        if (dto.getGuaranteeNumber() == null)
             throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент GuaranteeNumber");
-        if (holder == null)
+        if (dto.getHolderNumber() == null)
             throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент HolderNumber");
 
-        String responseType;
         String responseXml;
         String status;
         String customsIndex = "CSTM-" + System.currentTimeMillis();
 
-        if (guarantee.startsWith("KG")) {
-            responseType = "EPD028";
+        if (dto.getGuaranteeNumber().startsWith("KG")) {
             status = "APPROVED";
             responseXml = """
                 <EPD028>
@@ -40,18 +41,16 @@ public class Epd015Processor implements TirMessageProcessor {
                     <CustomsIndex>%s</CustomsIndex>
                     <Status>APPROVED</Status>
                 </EPD028>
-            """.formatted(guarantee, customsIndex);
-        } else if (guarantee.startsWith("XX")) {
-            responseType = "EPD016";
+            """.formatted(dto.getGuaranteeNumber(), customsIndex);
+        } else if (dto.getGuaranteeNumber().startsWith("XX")) {
             status = "REJECTED";
             responseXml = """
                 <EPD016>
                     <GuaranteeNumber>%s</GuaranteeNumber>
                     <Reason>Invalid guarantee prefix</Reason>
                 </EPD016>
-            """.formatted(guarantee);
+            """.formatted(dto.getGuaranteeNumber());
         } else {
-            responseType = "EPD029";
             status = "IN_PROGRESS";
             responseXml = """
                 <EPD029>
@@ -59,18 +58,19 @@ public class Epd015Processor implements TirMessageProcessor {
                     <CustomsIndex>%s</CustomsIndex>
                     <Status>IN_PROGRESS</Status>
                 </EPD029>
-            """.formatted(guarantee, customsIndex);
+            """.formatted(dto.getGuaranteeNumber(), customsIndex);
         }
 
-        repository.save(TirMessage.builder()
-                .messageType("EPD015")
-                .guaranteeNumber(guarantee)
-                .iruReference(iru)
-                .customsIndex(customsIndex)
-                .status(status)
-                .payload(xmlPayload)
-                .createdAt(LocalDateTime.now())
-                .build());
+        TirMessage tirMessage = tirMessageMapper.toEntity(dto);
+        tirMessage.setMessageType("EPD015");
+        tirMessage.setGuaranteeNumber(dto.getGuaranteeNumber());
+        tirMessage.setIruReference(iru);
+        tirMessage.setCustomsIndex(customsIndex);
+        tirMessage.setStatus(status);
+        tirMessage.setPayload(xmlPayload);
+        tirMessage.setCreatedAt(LocalDateTime.now());
+
+        repository.save(tirMessage);
 
         return responseXml;
     }

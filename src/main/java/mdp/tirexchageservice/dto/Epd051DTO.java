@@ -1,4 +1,4 @@
-package mdp.tirexchageservice.models.dto;
+package mdp.tirexchageservice.dto;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -7,13 +7,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 
 @Data
-@XmlRootElement(name = "EPD016")
+@XmlRootElement(name = "EPD051")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Epd016 {
+public class Epd051DTO {
+
+    @XmlElement(name = "GuaranteeNumber")
+    private String guaranteeNumber;
 
     @XmlElement(name = "Reason")
     private String reason;
 
-    @XmlElement(name = "Status")
-    private String status;
 }
