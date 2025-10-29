@@ -1,5 +1,6 @@
 package mdp.tirexchageservice.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -11,10 +12,12 @@ import lombok.Data;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Epd051DTO {
 
-    @XmlElement(name = "GuaranteeNumber")
+    @NotBlank(message = "GuaranteeNumber обязателен")
+    @XmlElement(name = "GuaranteeNumber", required = true)
     private String guaranteeNumber;
 
-    @XmlElement(name = "Reason")
+    @NotBlank(message = "Reason обязателен")
+    @XmlElement(name = "Reason", required = true)
     private String reason;
 
 }

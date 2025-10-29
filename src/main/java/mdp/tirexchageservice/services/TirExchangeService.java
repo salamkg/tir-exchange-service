@@ -7,6 +7,7 @@ import mdp.tirexchageservice.exceptions.SoapFaultException;
 import mdp.tirexchageservice.processor.ProcessorFactory;
 import mdp.tirexchageservice.processor.TirMessageProcessor;
 import mdp.tirexchageservice.respositories.TirMessageRepository;
+import mdp.tirexchageservice.util.UniversalXmlValidator;
 import mdp.tirexchageservice.util.XmlUtils;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,14 @@ import java.util.List;
 public class TirExchangeService {
     private final ProcessorFactory factory;
     private final TirMessageRepository tirMessageRepository;
+    private final UniversalXmlValidator xmlValidator;
 
     public String handleMessage(String xml) throws SoapFaultException, JAXBException {
         String rootTag = XmlUtils.getRootElementName(xml);
+
+        //Валидация
+        xmlValidator.validate(xml);
+
         TirMessageProcessor processor = factory.getProcessor(rootTag);
         return processor.process(xml);
     }
