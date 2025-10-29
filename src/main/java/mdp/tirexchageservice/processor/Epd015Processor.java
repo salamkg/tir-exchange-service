@@ -20,8 +20,8 @@ public class Epd015Processor implements TirMessageProcessor {
 
     @Override
     public String process(String xmlPayload) throws SoapFaultException, JAXBException {
-        //From XML to DTO
-        Epd015DTO dto = XmlUtils.fromXml(xmlPayload, Epd015DTO.class);
+        // Парсим XML через безопасный XmlUtils
+        Epd015DTO dto = XmlUtils.fromXmlSecure(xmlPayload, Epd015DTO.class);
         String iru = XmlUtils.extract(xmlPayload, "IruReference");
 
         if (dto.getGuaranteeNumber() == null)

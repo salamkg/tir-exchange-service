@@ -1,8 +1,12 @@
 package mdp.tirexchageservice.processor;
 
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
+import mdp.tirexchageservice.dto.Epd029DTO;
 import mdp.tirexchageservice.entities.TirMessage;
+import mdp.tirexchageservice.exceptions.SoapFaultException;
 import mdp.tirexchageservice.respositories.TirMessageRepository;
+import mdp.tirexchageservice.util.XmlUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,25 +17,33 @@ public class Epd029Processor implements TirMessageProcessor {
     private final TirMessageRepository repository;
 
     @Override
-    public String process(String xmlPayload) {
-        String guarantee = xmlPayload.contains("<GuaranteeNumber>")
-                ? xmlPayload.split("<GuaranteeNumber>")[1].split("</GuaranteeNumber>")[0]
-                : "UNKNOWN";
+    public String process(String xmlPayload) throws JAXBException, SoapFaultException {
+        Epd029DTO dto = XmlUtils.fromXmlSecure(xmlPayload, Epd029DTO.class);
 
-        repository.save(TirMessage.builder()
+        // Валидация обязательных полей
+        if (dto.getGuaranteeNumber() == null || dto.getGuaranteeNumber().isBlank()) {
+            throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент GuaranteeNumber");
+        }
+        if (dto.getStatus() == null || dto.getStatus().isBlank()) {
+            throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент Status");
+        }
+
+        TirMessage tirMessage = TirMessage.builder()
                 .messageType("EPD029")
-                .guaranteeNumber(guarantee)
-                .status("AUTHORIZED") //разрешение на транзит
+                .guaranteeNumber(dto.getGuaranteeNumber())
+                .status("AUTHORIZED")
                 .payload(xmlPayload)
                 .createdAt(LocalDateTime.now())
-                .build());
+                .build();
+
+        repository.save(tirMessage);
 
         return """
                 <EPD029>
                     <GuaranteeNumber>%s</GuaranteeNumber>
                     <Status>AUTHORIZED</Status>
                 </EPD029>"""
-                .formatted(guarantee);
+                .formatted(dto.getGuaranteeNumber());
     }
 }
 

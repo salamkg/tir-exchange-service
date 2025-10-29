@@ -1,6 +1,8 @@
 package mdp.tirexchageservice.processor;
 
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
+import mdp.tirexchageservice.dto.Epd028DTO;
 import mdp.tirexchageservice.exceptions.SoapFaultException;
 import mdp.tirexchageservice.entities.TirMessage;
 import mdp.tirexchageservice.respositories.TirMessageRepository;
@@ -15,23 +17,27 @@ public class Epd028Processor implements TirMessageProcessor {
     private final TirMessageRepository repository;
 
     @Override
-    public String process(String xmlPayload) throws SoapFaultException {
-        String guarantee = XmlUtils.extract(xmlPayload, "GuaranteeNumber");
-        String customsIndex = XmlUtils.extract(xmlPayload, "CustomsIndex");
+    public String process(String xmlPayload) throws SoapFaultException, JAXBException {
+        Epd028DTO dto = XmlUtils.fromXmlSecure(xmlPayload, Epd028DTO.class);
 
-        if (guarantee == null)
+        // Валидация обязательных полей
+        if (dto.getGuaranteeNumber() == null || dto.getGuaranteeNumber().isBlank()) {
             throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент GuaranteeNumber");
-        if (customsIndex == null)
+        }
+        if (dto.getCustomsIndex() == null || dto.getCustomsIndex().isBlank()) {
             throw new SoapFaultException("CLIENT_VALIDATION_ERROR", "Отсутствует элемент CustomsIndex");
+        }
 
-        repository.save(TirMessage.builder()
+        TirMessage tirMessage = TirMessage.builder()
                 .messageType("EPD028")
-                .guaranteeNumber(guarantee)
-                .customsIndex(customsIndex)
-                .status("ASSIGNED") // присвоение таможенного индекса
+                .guaranteeNumber(dto.getGuaranteeNumber())
+                .customsIndex(dto.getCustomsIndex())
+                .status("ASSIGNED")
                 .payload(xmlPayload)
                 .createdAt(LocalDateTime.now())
-                .build());
+                .build();
+
+        repository.save(tirMessage);
 
         return """
                 <EPD028>
@@ -39,7 +45,7 @@ public class Epd028Processor implements TirMessageProcessor {
                     <CustomsIndex>%s</CustomsIndex>
                     <Status>ASSIGNED</Status>
                 </EPD028>"""
-                .formatted(guarantee, customsIndex);
+                .formatted(dto.getGuaranteeNumber(), dto.getCustomsIndex());
     }
 }
 

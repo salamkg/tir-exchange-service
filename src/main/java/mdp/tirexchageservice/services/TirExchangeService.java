@@ -21,7 +21,7 @@ public class TirExchangeService {
     private final UniversalXmlValidator xmlValidator;
 
     public String handleMessage(String xml) throws SoapFaultException, JAXBException {
-        String rootTag = XmlUtils.getRootElementName(xml);
+        String rootTag = XmlUtils.getRootElementNameSecure(xml);
 
         //Валидация
         xmlValidator.validate(xml);
