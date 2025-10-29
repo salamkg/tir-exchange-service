@@ -22,6 +22,7 @@ public class TirMessage {
     private String customsIndex;
     private String status;
     @Lob
+    //@Column(columnDefinition = "TEXT")
     private String payload;
     private LocalDateTime createdAt;
 }

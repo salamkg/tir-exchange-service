@@ -1,9 +1,7 @@
 package mdp.tirexchageservice.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import jakarta.xml.bind.annotation.*;
 import lombok.Data;
 
@@ -47,13 +45,14 @@ public class Epd015DTO {
         @NotBlank(message = "HsCode обязателен")
         @XmlElement(name = "HsCode", required = true)
         private String hsCode;
-        @NotNull(message = "GrossWeight обязателен")
-        @XmlElement(name = "Description", required = true)
+        @XmlElement(name = "Description")
         private String description;
         @NotNull(message = "GrossWeight обязателен")
+        @DecimalMin(value = "0.1", message = "GrossWeight должен быть больше 0")
         @XmlElement(name = "GrossWeight", required = true)
         private double grossWeight;
         @NotNull(message = "Packages обязателен")
+        @Min(value = 1, message = "Packages должен быть >= 1")
         @XmlElement(name = "Packages", required = true)
         private int packages;
     }
